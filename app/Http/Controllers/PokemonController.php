@@ -4,21 +4,25 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use JsonException;
 use PokePHP\PokeApi;
 
 class PokemonController extends Controller
 {
     /**
      * Display a listing of the resource.
+     * @throws JsonException
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         $api = new PokeApi();
+        $limit = $request->get('limit', 10);
+        $offset = $request->get('offset', 0);
 
-        $response = $api->pokemon('');
+        $response = $api->resourceList('pokemon', $limit, $offset);
 
         return response()->json([
-            'data' => $response
+            'data' => json_decode($response, false, 512, JSON_THROW_ON_ERROR)
         ], 200);
     }
 
