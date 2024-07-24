@@ -1,7 +1,7 @@
 {
-    "name": "laravel/laravel",
+    "name": "laravel/poke-app",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "The Pokedesk App is a modern, interactive application designed for Pokémon enthusiasts.",
     "keywords": ["laravel", "framework"],
     "license": "MIT",
     "require": {
@@ -12,6 +12,7 @@
         "laravel/tinker": "^2.9"
     },
     "require-dev": {
+        "roave/security-advisories": "dev-latest",
         "fakerphp/faker": "^1.23",
         "laravel/pint": "^1.13",
         "laravel/sail": "^1.26",
