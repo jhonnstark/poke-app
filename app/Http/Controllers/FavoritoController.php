@@ -5,23 +5,21 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreFavoritoRequest;
 use App\Http\Requests\UpdateFavoritoRequest;
 use App\Models\Favorito;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class FavoritoController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): JsonResponse
     {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        $favoritos = Favorito::all();
+        return response()->json([
+            'data' => $favoritos
+        ], 200);
     }
 
     /**
@@ -29,38 +27,31 @@ class FavoritoController extends Controller
      */
     public function store(StoreFavoritoRequest $request)
     {
-        //
+        $user = User::find(1);
+        $user->favoritos()->firstOrCreate($request->all());
+        return response()->json([
+            'message' => 'Favorito creado con exito'
+        ], 201);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Favorito $favorito)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Favorito $favorito)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateFavoritoRequest $request, Favorito $favorito)
-    {
-        //
-    }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Favorito $favorito)
+    public function destroy(Request $request): JsonResponse
     {
-        //
+        $user = User::find(1);
+        $favorito = $user->favoritos()->where('pokemon_id', $request->get('pokemon_id'))->first();
+
+        if ($favorito) {
+            $favorito->delete();
+            return response()->json([
+                'message' => 'Favorito eliminado con exito'
+            ], 200);
+        }
+
+        return response()->json([
+            'message' => 'Favorito no encontrado'
+        ], 404);
     }
 }
