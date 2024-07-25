@@ -25,7 +25,7 @@ class FavoritoController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreFavoritoRequest $request)
+    public function store(StoreFavoritoRequest $request): JsonResponse
     {
         $user = User::find(1);
         $user->favoritos()->firstOrCreate($request->all());

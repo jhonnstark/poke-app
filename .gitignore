@@ -18,6 +18,9 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
+sail-meilisearch
+sail-mysql
+sail-redis
 
 /caddy
 frankenphp

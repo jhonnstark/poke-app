@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
@@ -23,8 +24,12 @@ class PokemonController extends Controller
         $response = $api->resourceList('pokemon', $limit, $offset);
         $decode = json_decode($response, false, 512, JSON_THROW_ON_ERROR);
 
-        $decode->results = array_map(function ($result) {
+        $favorites = User::find(1)->favoritos->pluck('pokemon_id')->toArray();
+
+        $results = array_map(function ($result) use ($favorites) {
             $result->url = preg_replace('/^.*\/v2\//', '', $result->url);
+            $result->id = (int) preg_replace('/\D/', '', $result->url);
+            $result->is_favorito = in_array($result->id, $favorites, true);
             return $result;
         }, $decode->results);
 
@@ -36,7 +41,7 @@ class PokemonController extends Controller
         $previousUrl = URL::current() . '?offset=' . $previousOffset . '&limit=' . $limit;
 
         return response()->json([
-            'results' => $decode->results,
+            'results' => $results,
             'next' => $nextUrl,
             'previous' => $previousUrl
         ], 200);
