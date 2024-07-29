@@ -7,21 +7,31 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 use JsonException;
+use Laravel\Octane\Exceptions\DdException;
 use PokePHP\PokeApi;
 
 class PokemonController extends Controller
 {
+    private PokeApi $api;
+
+    public function __construct(PokeApi $api)
+    {
+        $this->api = $api;
+    }
+
     /**
      * Display a listing of the resource.
-     * @throws JsonException
+     *
+     * @param Request $request
+     * @return JsonResponse
+     * @throws JsonException|DdException
      */
     public function index(Request $request): JsonResponse
     {
-        $api = new PokeApi();
         $limit = $request->get('limit', 10);
         $offset = $request->get('offset', 0);
 
-        $response = $api->resourceList('pokemon', $limit, $offset);
+        $response = $this->api->resourceList('pokemon', $limit, $offset);
         $decode = json_decode($response, false, 512, JSON_THROW_ON_ERROR);
 
         $favorites = User::find(1)->favoritos->pluck('pokemon_id')->toArray();
@@ -48,50 +58,28 @@ class PokemonController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        return 'store';
-    }
-
-    /**
      * Display the specified resource.
+     * @throws JsonException
      */
-    public function show(string $id)
+    public function show(string $id): JsonResponse
     {
-        //
-    }
+        $response = $this->api->pokemon($id);
+        try {
+            $decode = json_decode($response, false, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            throw new JsonException($e->getMessage(), $e->getCode(), $e);
+        }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
+        if (!isset($decode->name)) {
+            return response()->json([
+                'message' => 'Not found'
+            ], 404);
+        }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+        $decode->img = 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/' . $decode->id . '.png';
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        return response()->json([
+            'data' => $decode
+        ], 200);
     }
 }

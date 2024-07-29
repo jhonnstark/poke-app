@@ -12,6 +12,7 @@ Route::get('/user', function (Request $request) {
 
 Route::prefix('pokemon')->middleware('uuid')->group(callback: function () {
     Route::get('/', [PokemonController::class, 'index']);
+    Route::get('/{pokemon}', [PokemonController::class, 'show']);
 });
 
 Route::prefix('favorito')->middleware(ValidateUuidMiddleware::class)->group(callback: function () {
